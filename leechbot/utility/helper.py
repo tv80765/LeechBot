@@ -90,6 +90,8 @@ def is_terabox(link: str) -> bool:
 
 def is_ytdl_link(link: str) -> bool:
     """Check if link is supported by yt-dlp (YouTube, social media, etc.)."""
+    if is_terabox(link):
+        return False
     lower = link.lower()
     ytdl_domains = [
         # Video platforms

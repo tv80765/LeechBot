@@ -87,9 +87,13 @@ async def downloadManager(sources: list, is_ytdl: bool):
     BotTimes.task_start = datetime.now()
 
     if is_ytdl:
-        # YT-DLP mode — all links go through yt-dlp
+        # YT-DLP mode — most links go through yt-dlp (Terabox uses its own module)
         for i, link in enumerate(sources):
             try:
+                if is_terabox(link):
+                    from leechbot.downloader.terabox import terabox_download
+                    await _with_retry(lambda l=link, n=i+1: terabox_download(l, n), link)
+                    continue
                 await _with_retry(
                     lambda l=link, n=i+1: YTDL_Status(l, n),
                     link
@@ -256,6 +260,8 @@ async def get_d_name(link: str):
     elif is_gallery(link):
         from leechbot.downloader.gallery import get_gallery_name
         Messages.download_name = await get_gallery_name(link)
+    elif is_terabox(link):
+        Messages.download_name = "Terabox Download"
     elif is_ytdl_link(link):
         Messages.download_name = await get_YT_Name(link)
     elif is_hls_stream(link):
