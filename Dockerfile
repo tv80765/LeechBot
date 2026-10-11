@@ -54,7 +54,11 @@ WORKDIR /app
 
 # Copy requirements first (Docker layer caching — deps change less than code)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# TgCrypto has no cp312 wheel on some platforms — compile with gcc, then drop build deps
+RUN apt-get update && apt-get install -y --no-install-recommends gcc python3-dev \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get purge -y --auto-remove gcc python3-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy application code
 COPY . .

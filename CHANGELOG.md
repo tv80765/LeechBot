@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Video conversion on Python 3.12+** — defer GPUtil import (uses removed `distutils`); detect NVIDIA GPUs via `nvidia-smi` first so the bot starts on macOS and newer Python without GPUtil at import time.
 - **Docker / Railway one-click deploy** — pin `python:3.12-slim-bookworm` and enable Debian `non-free` for `unrar`; fixes `E: Package 'unrar' has no installation candidate` on current `python:3.12-slim` (Trixie) images.
+- **Docker `tgcrypto` build** — install `gcc` + `python3-dev` during `pip install` so TgCrypto can compile on slim images (`error: No such file or directory: 'gcc'`).
 - **Terabox / 1024terabox downloads** — gallery-dl routing false-positive (`x.com` substring inside `terabox.com`); match gallery hosts by domain and route Terabox before gallery-dl.
 
 ---
