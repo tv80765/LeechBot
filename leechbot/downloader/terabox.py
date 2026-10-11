@@ -14,6 +14,7 @@ Resolves Terabox share links via configurable/third-party APIs or page
 extraction, then hands direct URLs to aria2c for the actual download.
 """
 
+import asyncio
 import logging
 import re
 from typing import Any
@@ -32,6 +33,27 @@ _UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
 
 # Legacy API (often offline) — kept as last resort
 _SAVETUBE_API = "https://ytshorts.savetube.me/api/v1/terabox-downloader"
+_JS_TOKEN_PATTERNS = (
+    re.compile(r'fn%28%22(.*?)%22%29'),
+    re.compile(r'"jsToken"\s*:\s*"([^"]+)"'),
+    re.compile(r"jsToken['\"]?\s*[:=]\s*['\"]([^'\"]+)"),
+)
+_SHARE_API_BASES = (
+    "https://dm.terabox.app",
+    "https://www.terabox.app",
+)
+
+
+def extract_surl(link: str) -> str | None:
+    """Extract Terabox short-url code from a share link."""
+    parsed = urlparse(link.strip())
+    qs = parse_qs(parsed.query)
+    if qs.get("surl"):
+        return unquote(qs["surl"][0])
+    match = re.search(r"/s/(1?[^/?#]+)", parsed.path, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    return None
 
 
 def normalize_terabox_url(link: str) -> str:
@@ -175,6 +197,112 @@ async def _extract_from_share_page(session: aiohttp.ClientSession, link: str) ->
     return None
 
 
+def _extract_js_token(html: str) -> str | None:
+    for pattern in _JS_TOKEN_PATTERNS:
+        match = pattern.search(html)
+        if match:
+            return match.group(1)
+    return None
+
+
+def _dlink_from_share_json(data: dict) -> str | None:
+    if not isinstance(data, dict):
+        return None
+    if data.get("errno") not in (0, None):
+        return None
+    items = data.get("list") or data.get("data", {}).get("list")
+    if not items:
+        return None
+    first = items[0] if isinstance(items, list) else items
+    if isinstance(first, dict):
+        dlink = first.get("dlink") or first.get("download_link")
+        if isinstance(dlink, str) and dlink.startswith("http"):
+            return dlink.replace("\\/", "/")
+    return None
+
+
+def _share_api_sync(surl: str, ndus: str) -> str:
+    """Resolve dlink via Terabox share/list (curl_cffi Chrome impersonation)."""
+    from curl_cffi import requests as curl_requests
+
+    short = surl[1:] if surl.startswith("1") else surl
+    session = curl_requests.Session(impersonate="chrome124")
+    if ndus:
+        for domain in (".terabox.app", ".terabox.com"):
+            session.cookies.set("ndus", ndus, domain=domain)
+
+    headers = {
+        "User-Agent": _UA,
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+    last_error = "unknown"
+
+    for base in _SHARE_API_BASES:
+        try:
+            page_url = f"{base}/sharing/link?surl={short}"
+            page = session.get(page_url, headers=headers, timeout=45)
+            if page.status_code >= 400:
+                last_error = f"page HTTP {page.status_code} on {base}"
+                continue
+            js_token = _extract_js_token(page.text)
+            if not js_token:
+                last_error = f"jsToken not found on {base}"
+                continue
+
+            api_url = f"{base}/share/list"
+            params = {
+                "app_id": "250528",
+                "jsToken": js_token,
+                "site_referer": "https://www.terabox.app/",
+                "shorturl": short,
+                "root": "1",
+            }
+            api_headers = {
+                **headers,
+                "Accept": "application/json, text/plain, */*",
+                "X-Requested-With": "XMLHttpRequest",
+                "Referer": f"{base}/sharing/link?surl={short}",
+                "Origin": base,
+            }
+            api_resp = session.get(
+                api_url, params=params, headers=api_headers, timeout=45
+            )
+            if api_resp.status_code >= 400:
+                last_error = f"share/list HTTP {api_resp.status_code} on {base}"
+                continue
+            dlink = _dlink_from_share_json(api_resp.json())
+            if not dlink:
+                last_error = f"no dlink in share/list on {base}"
+                continue
+
+            try:
+                head = session.head(dlink, allow_redirects=False, timeout=45)
+                location = head.headers.get("Location")
+                if location and location.startswith("http"):
+                    return location
+            except Exception:
+                pass
+            return dlink
+        except Exception as e:
+            last_error = str(e)
+            logger.debug("Terabox share API %s failed: %s", base, e)
+
+    raise RuntimeError(last_error)
+
+
+async def _fetch_via_share_api(link: str) -> dict | None:
+    surl = extract_surl(link)
+    if not surl:
+        return None
+    ndus = (config.TERABOX_NDUS_COOKIE or "").strip()
+    try:
+        dlink = await asyncio.to_thread(_share_api_sync, surl, ndus)
+        return {"Fast Download": dlink}
+    except Exception as e:
+        logger.warning("Terabox native share API failed: %s", e)
+        return None
+
+
 async def _fetch_download_urls(link: str) -> dict:
     """
     Resolve Terabox share link to a resolutions dict (fast/slow URLs).
@@ -184,6 +312,10 @@ async def _fetch_download_urls(link: str) -> dict:
     """
     errors: list[str] = []
     custom = (config.TERABOX_API_URL or "").strip()
+
+    native = await _fetch_via_share_api(link)
+    if native:
+        return native
 
     async with aiohttp.ClientSession(timeout=_REQUEST_TIMEOUT) as session:
         for candidate in _candidate_urls(link):
@@ -210,8 +342,9 @@ async def _fetch_download_urls(link: str) -> dict:
                 return resolutions
 
     hint = (
-        "Terabox resolver failed (third-party API offline or link blocked). "
-        "Set TERABOX_API_URL to your own resolver (e.g. self-hosted terabox-gateway) in Railway variables."
+        "Terabox could not resolve this link from the server. "
+        "In Railway → Variables add TERABOX_NDUS_COOKIE (copy the `ndus` cookie while logged in at terabox.com), "
+        "or TERABOX_API_URL for a self-hosted resolver, or run the bot on a home/VPS IP."
     )
     if errors:
         logger.warning("Terabox resolver attempts: %s", "; ".join(errors[:3]))

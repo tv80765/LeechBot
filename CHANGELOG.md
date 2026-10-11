@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - **Docker `tgcrypto` build** — install `gcc` + `python3-dev` during `pip install` so TgCrypto can compile on slim images (`error: No such file or directory: 'gcc'`).
 - **Kurigram 2.2+** — remove deprecated `quote=True` from `Message.reply_text()` (fixes `unexpected keyword argument 'quote'` when sending links).
 - **Terabox** — normalize `terabox.app` share links; page/API fallback chain; `TERABOX_API_URL` env; skip yt-dlp for Terabox (including `/ytupload`); clearer error when savetube API is offline.
+- **Terabox native resolver** — `curl_cffi` share/list flow (`dm.terabox.app`); optional `TERABOX_NDUS_COOKIE` for cloud/datacenter IPs.
 - **Terabox / 1024terabox downloads** — gallery-dl routing false-positive (`x.com` substring inside `terabox.com`); match gallery hosts by domain and route Terabox before gallery-dl.
 
 ---

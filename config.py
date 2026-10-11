@@ -122,6 +122,12 @@ YTDL_COOKIES_FILE = os.getenv("YTDL_COOKIES_FILE", "")
 # Optional HTTP API that accepts the share URL (GET ?url= or POST {"url": ...}).
 # Use when built-in resolvers fail (e.g. self-hosted terabox-gateway).
 TERABOX_API_URL = os.getenv("TERABOX_API_URL", "")
+# Browser `ndus` cookie from terabox.com — often required on cloud IPs (Railway, etc.)
+TERABOX_NDUS_COOKIE = (
+    os.getenv("TERABOX_NDUS_COOKIE", "")
+    or os.getenv("NDUS_COOKIE", "")
+    or os.getenv("TERABOX_COOKIE", "")
+)
 
 # =============================================================================
 # Multi-User Support
