@@ -117,6 +117,13 @@ TOKEN_PICKLE_PATH = os.getenv("TOKEN_PICKLE_PATH", str(BASE_DIR / "token.pickle"
 YTDL_COOKIES_FILE = os.getenv("YTDL_COOKIES_FILE", "")
 
 # =============================================================================
+# Terabox
+# =============================================================================
+# Optional HTTP API that accepts the share URL (GET ?url= or POST {"url": ...}).
+# Use when built-in resolvers fail (e.g. self-hosted terabox-gateway).
+TERABOX_API_URL = os.getenv("TERABOX_API_URL", "")
+
+# =============================================================================
 # Multi-User Support
 # =============================================================================
 ALLOWED_USERS = [
