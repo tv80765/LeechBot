@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 @app.on_message(filters.command("ping") & filters.private)
 async def ping_command(client, message):
     start = datetime.now()
-    msg = await message.reply_text("<b>🏓 Pinging...</b>", quote=True)
+    msg = await message.reply_text("<b>🏓 Pinging...</b>")
     latency_ms = (datetime.now() - start).total_seconds() * 1000
     uptime = getTime(int((datetime.now() - BotStats.start_time).total_seconds()))
 
@@ -130,7 +130,7 @@ async def status_command(client, message):
         queue_section = "<b>📋 Queue</b>\n\n• <code>Empty</code>"
 
     status_text = f"{active_section}\n\n{queue_section}"
-    msg = await message.reply_text(status_text, quote=True)
+    msg = await message.reply_text(status_text)
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -139,7 +139,7 @@ async def status_command(client, message):
 @app.on_message(filters.command("stats") & filters.private)
 async def stats_command(client, message):
     stats_text = f"{format_stats()}{sysINFO()}"
-    msg = await message.reply_text(stats_text, quote=True)
+    msg = await message.reply_text(stats_text)
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -173,6 +173,6 @@ async def queue_command(client, message):
     stats_text += f"• Downloaded: <code>{BotStats.total_downloaded}</code>\n"
     stats_text += f"• Uploaded: <code>{BotStats.total_uploaded}</code>"
 
-    msg = await message.reply_text(text + stats_text, quote=True)
+    msg = await message.reply_text(text + stats_text)
     await message_deleter(message, msg)
 

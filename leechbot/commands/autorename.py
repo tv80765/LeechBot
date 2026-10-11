@@ -43,17 +43,15 @@ async def autorename_command(client, message):
             f"<b>💡 Note:</b> Don't put .mkv or .mp4 at the end.\n"
             f"The bot will use this template to rename your files automatically.\n\n"
             f"<b>🗑️ To clear:</b> <code>/autorename clear</code>",
-            quote=True,
         )
     elif message.command[1].lower() == "clear":
         BOT.Setting.autorename_template = ""
-        msg = await message.reply_text("<b>✅ Auto-rename template cleared.</b>", quote=True)
+        msg = await message.reply_text("<b>✅ Auto-rename template cleared.</b>")
     else:
         BOT.Setting.autorename_template = " ".join(message.command[1:])
         msg = await message.reply_text(
             f"<b>🏷️ Auto-Rename Template Set</b>\n\n"
             f"<b>📝 Template:</b> <code>{BOT.Setting.autorename_template}</code>\n\n"
             f"<b>💡 The bot will use this pattern to rename files.</b>",
-            quote=True,
         )
     await message_deleter(message, msg)

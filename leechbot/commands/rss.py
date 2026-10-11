@@ -37,7 +37,6 @@ async def rss_add_command(client, message):
             "<b>Example:</b> <code>/rss_add https://rsshub.app/youtube/user/USERNAME ytupload</code>\n"
             "<b>Commands:</b> tupload, gdupload, ytupload, glupload, drupload (or aliases like yt, dl)\n"
             "<b>Interval:</b> optional, default 15 minutes",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
@@ -54,12 +53,11 @@ async def rss_add_command(client, message):
             f"<b>URL:</b> <code>{url[:200]}</code>\n"
             f"<b>Command:</b> <code>/{command}</code>\n"
             f"<b>Interval:</b> <code>{interval} min</code>",
-            quote=True,
             link_preview_options=types.LinkPreviewOptions(is_disabled=True),
         )
     except Exception as e:
         logger.error("rss_add failed: %s", e)
-        msg = await message.reply_text(f"<b>❌ Failed to add feed:</b> <code>{e}</code>", quote=True)
+        msg = await message.reply_text(f"<b>❌ Failed to add feed:</b> <code>{e}</code>")
 
     await message_deleter(message, msg)
 
@@ -72,7 +70,7 @@ async def rss_list_command(client, message):
 
     feeds = list_feeds()
     if not feeds:
-        msg = await message.reply_text("<b>ℹ️ No RSS feeds configured.</b>", quote=True)
+        msg = await message.reply_text("<b>ℹ️ No RSS feeds configured.</b>")
         await message_deleter(message, msg)
         return
 
@@ -86,7 +84,6 @@ async def rss_list_command(client, message):
 
     msg = await message.reply_text(
         f"<b>📰 RSS Feeds</b>\n\n" + "\n\n".join(lines),
-        quote=True,
         link_preview_options=types.LinkPreviewOptions(is_disabled=True),
     )
     await message_deleter(message, msg)
@@ -101,7 +98,7 @@ async def rss_remove_command(client, message):
     parts = message.command
     if len(parts) < 2:
         msg = await message.reply_text(
-            "<b>⚠️ Usage:</b> <code>/rss_remove &lt;feed_id&gt;</code>", quote=True
+            "<b>⚠️ Usage:</b> <code>/rss_remove &lt;feed_id&gt;</code>"
         )
         await message_deleter(message, msg)
         return
@@ -109,14 +106,14 @@ async def rss_remove_command(client, message):
     try:
         feed_id = int(parts[1])
     except ValueError:
-        msg = await message.reply_text("<b>⚠️ Feed ID must be a number.</b>", quote=True)
+        msg = await message.reply_text("<b>⚠️ Feed ID must be a number.</b>")
         await message_deleter(message, msg)
         return
 
     if remove_feed(feed_id):
-        msg = await message.reply_text(f"<b>✅ RSS feed {feed_id} removed.</b>", quote=True)
+        msg = await message.reply_text(f"<b>✅ RSS feed {feed_id} removed.</b>")
     else:
-        msg = await message.reply_text(f"<b>ℹ️ Feed ID {feed_id} not found.</b>", quote=True)
+        msg = await message.reply_text(f"<b>ℹ️ Feed ID {feed_id} not found.</b>")
 
     await message_deleter(message, msg)
 
@@ -127,7 +124,7 @@ async def rss_check_command(client, message):
     if message.chat.id != OWNER:
         return
 
-    msg = await message.reply_text("<b>🔍 Checking RSS feeds...</b>", quote=True)
+    msg = await message.reply_text("<b>🔍 Checking RSS feeds...</b>")
     try:
         await check_feeds_once()
         await msg.edit_text("<b>✅ RSS check complete.</b>")

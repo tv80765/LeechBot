@@ -39,9 +39,9 @@ logger = logging.getLogger(__name__)
 async def cancel_command(client, message):
     if BOT.State.task_going:
         await cancelTask("User cancelled the task")
-        msg = await message.reply_text("<b>🚫 Task Cancelled</b> ✓", quote=True)
+        msg = await message.reply_text("<b>🚫 Task Cancelled</b> ✓")
     else:
-        msg = await message.reply_text("<b>ℹ️ No Active Task To Cancel</b>", quote=True)
+        msg = await message.reply_text("<b>ℹ️ No Active Task To Cancel</b>")
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -56,9 +56,9 @@ async def cancel_all_command(client, message):
 
     if BOT.State.task_going:
         await cancelTask("User cancelled all tasks")
-        msg = await message.reply_text("<b>🚫 All tasks cancelled and queue cleared.</b>", quote=True)
+        msg = await message.reply_text("<b>🚫 All tasks cancelled and queue cleared.</b>")
     else:
-        msg = await message.reply_text("<b>📭 Queue cleared. No active task to cancel.</b>", quote=True)
+        msg = await message.reply_text("<b>📭 Queue cleared. No active task to cancel.</b>")
 
     await message_deleter(message, msg)
 
@@ -78,7 +78,6 @@ async def admin_command(client, message):
             f"<code>/admin add &lt;user_id&gt;</code> — Allow a user\n"
             f"<code>/admin remove &lt;user_id&gt;</code> — Deny a user\n"
             f"<code>/admin list</code> — Show allowed users",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
@@ -90,29 +89,29 @@ async def admin_command(client, message):
             new_uid = int(message.command[2])
             if new_uid not in config.ALLOWED_USERS:
                 config.ALLOWED_USERS.append(new_uid)
-                msg = await message.reply_text(f"✅ User <code>{new_uid}</code> added to allowed list ✓", quote=True)
+                msg = await message.reply_text(f"✅ User <code>{new_uid}</code> added to allowed list ✓")
             else:
-                msg = await message.reply_text(f"ℹ️ User <code>{new_uid}</code> is already allowed", quote=True)
+                msg = await message.reply_text(f"ℹ️ User <code>{new_uid}</code> is already allowed")
         except ValueError:
-            msg = await message.reply_text("⚠️ Invalid user ID", quote=True)
+            msg = await message.reply_text("⚠️ Invalid user ID")
 
     elif action == "remove" and len(message.command) >= 3:
         try:
             rm_uid = int(message.command[2])
             if rm_uid in config.ALLOWED_USERS:
                 config.ALLOWED_USERS.remove(rm_uid)
-                msg = await message.reply_text(f"✅ User <code>{rm_uid}</code> removed from allowed list ✓", quote=True)
+                msg = await message.reply_text(f"✅ User <code>{rm_uid}</code> removed from allowed list ✓")
             else:
-                msg = await message.reply_text(f"ℹ️ User <code>{rm_uid}</code> is not in the allowed list", quote=True)
+                msg = await message.reply_text(f"ℹ️ User <code>{rm_uid}</code> is not in the allowed list")
         except ValueError:
-            msg = await message.reply_text("⚠️ Invalid user ID", quote=True)
+            msg = await message.reply_text("⚠️ Invalid user ID")
 
     elif action == "list":
         users_list = "\n".join([f"• <code>{uid}</code>" for uid in config.ALLOWED_USERS]) or "<code>None</code>"
-        msg = await message.reply_text(f"<b>👥 Allowed Users:</b>\n{users_list}", quote=True)
+        msg = await message.reply_text(f"<b>👥 Allowed Users:</b>\n{users_list}")
 
     else:
-        msg = await message.reply_text("<b>⚠️ Usage:</b> <code>/admin add|remove|list [user_id]</code>", quote=True)
+        msg = await message.reply_text("<b>⚠️ Usage:</b> <code>/admin add|remove|list [user_id]</code>")
 
     await message_deleter(message, msg)
 
@@ -129,7 +128,6 @@ async def broadcast_command(client, message):
     if not BOT.State.task_going and not Transfer.sent_file:
         msg = await message.reply_text(
             "<b>ℹ️ No files to broadcast.</b>\n\nUpload something first with <code>/tupload</code>.",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
@@ -141,7 +139,6 @@ async def broadcast_command(client, message):
             "<b>📝 Example:</b>\n"
             "<code>/broadcast -1001234567890, -1009876543210</code>\n\n"
             "💡 Send the last uploaded file to multiple chats.",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
@@ -155,17 +152,17 @@ async def broadcast_command(client, message):
             pass
 
     if not chat_ids:
-        msg = await message.reply_text("<b>⚠️ No valid chat IDs provided.</b>", quote=True)
+        msg = await message.reply_text("<b>⚠️ No valid chat IDs provided.</b>")
         await message_deleter(message, msg)
         return
 
     last_file = Transfer.sent_file[-1] if Transfer.sent_file else None
     if not last_file:
-        msg = await message.reply_text("<b>⚠️ No file to broadcast.</b>", quote=True)
+        msg = await message.reply_text("<b>⚠️ No file to broadcast.</b>")
         await message_deleter(message, msg)
         return
 
-    msg = await message.reply_text(f"<b>📢 Broadcasting to {len(chat_ids)} chats...</b>", quote=True)
+    msg = await message.reply_text(f"<b>📢 Broadcasting to {len(chat_ids)} chats...</b>")
 
     success = 0
     failed = 0
@@ -239,7 +236,7 @@ Upload a <code>cookies.txt</code> file here as a backup:
 
 📖 <a href="https://github.com/yt-dlp/yt-dlp/wiki/PO-Token-Guide">PO Token Guide</a>"""
 
-    msg = await message.reply_text(text, quote=True, link_preview_options=types.LinkPreviewOptions(is_disabled=True))
+    msg = await message.reply_text(text, link_preview_options=types.LinkPreviewOptions(is_disabled=True))
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -267,7 +264,7 @@ Send me your <code>cookies.txt</code> file <b>as a document</b> (not as text).
 
 ⚠️ <b>Security:</b> Cookies contain your session tokens. The bot stores them locally and never shares them. Delete with <code>/clearcookies</code> if needed."""
 
-    msg = await message.reply_text(text, quote=True, link_preview_options=types.LinkPreviewOptions(is_disabled=True))
+    msg = await message.reply_text(text, link_preview_options=types.LinkPreviewOptions(is_disabled=True))
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -282,11 +279,11 @@ async def clearcookies_command(client, message):
     if os.path.isfile(cookie_path):
         try:
             os.remove(cookie_path)
-            msg = await message.reply_text("<b>✅ Cookies file deleted.</b>", quote=True)
+            msg = await message.reply_text("<b>✅ Cookies file deleted.</b>")
         except OSError as e:
-            msg = await message.reply_text(f"<b>❌ Failed:</b> <code>{e}</code>", quote=True)
+            msg = await message.reply_text(f"<b>❌ Failed:</b> <code>{e}</code>")
     else:
-        msg = await message.reply_text("<b>ℹ️ No cookies file to delete.</b>", quote=True)
+        msg = await message.reply_text("<b>ℹ️ No cookies file to delete.</b>")
 
     await message_deleter(message, msg)
 
@@ -311,7 +308,7 @@ async def restart_command(client, message):
         "• <b>Wrapper:</b> Will respawn the process\n\n"
         "⏳ Bot will be back in 5-10 seconds."
     )
-    msg = await message.reply_text(restart_text, quote=True)
+    msg = await message.reply_text(restart_text)
     await message_deleter(message, msg)
 
     logger.warning(
@@ -348,7 +345,6 @@ async def logs_command(client, message):
         msg = await message.reply_text(
             f"<b>📋 Logs</b>\n\n<code>Log file not found: {log_file}</code>\n\n"
             "<i>File logging may be disabled (read-only filesystem).</i>",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
@@ -387,12 +383,12 @@ async def logs_command(client, message):
                 + "\n</pre>"
             )
 
-        msg = await message.reply_text(log_text, quote=True)
+        msg = await message.reply_text(log_text)
         await message_deleter(message, msg)
     except Exception as e:
         logger.error(f"Failed to read log file: {e}")
         msg = await message.reply_text(
-            f"<b>❌ Error reading logs:</b>\n<code>{e}</code>", quote=True,
+            f"<b>❌ Error reading logs:</b>\n<code>{e}</code>",
         )
         await message_deleter(message, msg)
 
@@ -406,7 +402,7 @@ async def update_command(client, message):
     if message.chat.id != OWNER:
         return
 
-    msg = await message.reply_text("<b>🔄 Checking for updates...</b>", quote=True)
+    msg = await message.reply_text("<b>🔄 Checking for updates...</b>")
 
     info = check_for_updates()
     version = get_local_version()

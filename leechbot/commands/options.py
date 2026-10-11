@@ -42,11 +42,10 @@ async def setname_command(client, message):
         msg = await message.reply_text(
             "<b>⚠️ Usage:</b> <code>/setname &lt;filename&gt;</code>\n\n"
             "<b>📝 Example:</b> <code>/setname movie.mp4</code>",
-            quote=True,
         )
     else:
         BOT.Options.file_name = " ".join(message.command[1:])
-        msg = await message.reply_text(f"<b>📝 Filename set to:</b> <code>{BOT.Options.file_name}</code> ✓", quote=True)
+        msg = await message.reply_text(f"<b>📝 Filename set to:</b> <code>{BOT.Options.file_name}</code> ✓")
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -64,13 +63,12 @@ async def formats_command(client, message):
         msg = await message.reply_text(
             "<b>⚠️ Usage:</b> <code>/formats &lt;url&gt;</code>\n\n"
             "Example: <code>/formats https://youtube.com/watch?v=...</code>",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
 
     url = parts[1].strip()
-    status = await message.reply_text("<b>🔍 Fetching available formats...</b>", quote=True)
+    status = await message.reply_text("<b>🔍 Fetching available formats...</b>")
     try:
         text = await list_formats(url)
         await status.edit_text(text, link_preview_options=types.LinkPreviewOptions(is_disabled=True))
@@ -94,13 +92,12 @@ async def preview_command(client, message):
         msg = await message.reply_text(
             "<b>⚠️ Usage:</b> <code>/preview &lt;gallery_url&gt;</code>\n\n"
             "Example: <code>/preview https://imgur.com/a/abc123</code>",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
 
     url = parts[1].strip()
-    status = await message.reply_text("<b>🔍 Inspecting gallery...</b>", quote=True)
+    status = await message.reply_text("<b>🔍 Inspecting gallery...</b>")
     try:
         text = await list_gallery_content(url)
         await status.edit_text(text, link_preview_options=types.LinkPreviewOptions(is_disabled=True))
@@ -119,11 +116,10 @@ async def zipaswd_command(client, message):
             "<b>⚠️ Usage</b>\n\n"
             "<code>/zipaswd &lt;password&gt;</code>\n\n"
             "<b>📝 Example:</b> <code>/zipaswd mypassword123</code>",
-            quote=True,
         )
     else:
         BOT.Options.zip_pswd = message.command[1]
-        msg = await message.reply_text("<b>🔐 Zip Password Set Successfully</b> ✓", quote=True)
+        msg = await message.reply_text("<b>🔐 Zip Password Set Successfully</b> ✓")
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -136,11 +132,10 @@ async def unzipaswd_command(client, message):
             "<b>⚠️ Usage</b>\n\n"
             "<code>/unzipaswd &lt;password&gt;</code>\n\n"
             "<b>📝 Example:</b> <code>/unzipaswd mypassword123</code>",
-            quote=True,
         )
     else:
         BOT.Options.unzip_pswd = message.command[1]
-        msg = await message.reply_text("<b>🔓 Unzip Password Set Successfully</b> ✓", quote=True)
+        msg = await message.reply_text("<b>🔓 Unzip Password Set Successfully</b> ✓")
     await message_deleter(message, msg)
 
 # =============================================================================
@@ -156,7 +151,6 @@ async def alias_command(client, message):
             "<b>⚠️ Usage:</b> <code>/alias &lt;name&gt; &lt;target&gt;</code>\n\n"
             "<b>Example:</b> <code>/alias dl tupload</code>\n"
             "<b>Result:</b> <code>/dl</code> will behave like <code>/tupload</code>",
-            quote=True,
         )
         await message_deleter(message, msg)
         return
@@ -165,11 +159,11 @@ async def alias_command(client, message):
     target = message.command[2]
     if set_alias(name, target):
         msg = await message.reply_text(
-            f"<b>✅ Alias set:</b> <code>/{name}</code> → <code>/{target}</code>", quote=True
+            f"<b>✅ Alias set:</b> <code>/{name}</code> → <code>/{target}</code>"
         )
     else:
         msg = await message.reply_text(
-            "<b>⚠️ Invalid alias.</b> Name and target cannot be empty or identical.", quote=True
+            "<b>⚠️ Invalid alias.</b> Name and target cannot be empty or identical."
         )
     await message_deleter(message, msg)
 
@@ -183,13 +177,13 @@ async def aliases_command(client, message):
 
     aliases = get_aliases()
     if not aliases:
-        msg = await message.reply_text("<b>ℹ️ No aliases set.</b>", quote=True)
+        msg = await message.reply_text("<b>ℹ️ No aliases set.</b>")
         await message_deleter(message, msg)
         return
 
     lines = "\n".join([f"• <code>/{name}</code> → <code>/{target}</code>" for name, target in aliases.items()])
     msg = await message.reply_text(
-        f"<b>🔀 Command Aliases</b>\n\n{lines}", quote=True
+        f"<b>🔀 Command Aliases</b>\n\n{lines}"
     )
     await message_deleter(message, msg)
 
@@ -203,7 +197,7 @@ async def unalias_command(client, message):
 
     if len(message.command) < 2:
         msg = await message.reply_text(
-            "<b>⚠️ Usage:</b> <code>/unalias &lt;name&gt;</code>", quote=True
+            "<b>⚠️ Usage:</b> <code>/unalias &lt;name&gt;</code>"
         )
         await message_deleter(message, msg)
         return
@@ -211,11 +205,11 @@ async def unalias_command(client, message):
     name = message.command[1]
     if remove_alias(name):
         msg = await message.reply_text(
-            f"<b>✅ Alias removed:</b> <code>/{name}</code>", quote=True
+            f"<b>✅ Alias removed:</b> <code>/{name}</code>"
         )
     else:
         msg = await message.reply_text(
-            f"<b>ℹ️ Alias not found:</b> <code>/{name}</code>", quote=True
+            f"<b>ℹ️ Alias not found:</b> <code>/{name}</code>"
         )
     await message_deleter(message, msg)
 

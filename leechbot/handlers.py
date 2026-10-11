@@ -141,7 +141,7 @@ async def handle_url(client, message):
 📂 <b>Extract</b> — Extract archive before upload
 🔄 <b>Unzip+Zip</b> — Extract then compress"""
 
-        await message.reply_text(text=options_text, reply_markup=keyboard, quote=True)
+        await message.reply_text(text=options_text, reply_markup=keyboard)
 
     elif BOT.State.started:
         await message.delete()
