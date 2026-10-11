@@ -69,8 +69,16 @@ GALLERY_SITES = [
 
 def is_gallery_link(link: str) -> bool:
     """Check if a link is supported by gallery-dl."""
-    link_lower = link.lower()
-    return any(site in link_lower for site in GALLERY_SITES)
+    from urllib.parse import urlparse
+
+    host = (urlparse(link.strip()).hostname or "").lower().removeprefix("www.")
+    if not host:
+        return False
+    for site in GALLERY_SITES:
+        site = site.lower()
+        if host == site or host.endswith(f".{site}"):
+            return True
+    return False
 
 
 # =============================================================================

@@ -173,6 +173,8 @@ def detect_link_type(link: str) -> str:
         return "♻️ Google Drive"
     elif is_torrent(link):
         return "🧲 Torrent"
+    elif is_terabox(link):
+        return "🍑 Terabox"
     elif is_gallery(link):
         return "📸 Gallery"
     elif is_hls_stream(link):
@@ -185,8 +187,6 @@ def detect_link_type(link: str) -> str:
         return "🎬 StreamTape"
     elif is_ytdl_link(link):
         return "🏮 YT-DLP"
-    elif is_terabox(link):
-        return "🍑 Terabox"
     elif is_mega(link):
         return "💾 Mega"
     elif is_pixeldrain(link):

@@ -13,7 +13,6 @@ File conversion module for video, archive creation, and extraction.
 
 import os
 import json
-import GPUtil
 import shutil
 import logging
 import subprocess
@@ -35,6 +34,27 @@ from leechbot.utility.variables import BOT, MSG, BotTimes, Paths, Messages
 from leechbot.utility.helper import getSize, fileType, keyboard, multipartArchive, sizeUnit, speedETA, status_bar, getTime, sysINFO
 
 logger = logging.getLogger(__name__)
+
+
+def _nvenc_gpu_available() -> bool:
+    """True if an NVIDIA GPU is available for ffmpeg h264_nvenc (best-effort)."""
+    try:
+        result = subprocess.run(
+            ["nvidia-smi", "-L"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return True
+    except Exception:
+        pass
+    try:
+        import GPUtil
+
+        return len(GPUtil.getAvailable()) > 0
+    except Exception:
+        return False
 
 
 # =============================================================================
@@ -110,7 +130,7 @@ async def videoConverter(file: str) -> str:
         return file
 
     out_file = f"{name}.{BOT.Options.video_out}"
-    gpu_available = len(GPUtil.getAvailable()) > 0
+    gpu_available = _nvenc_gpu_available()
 
     # Quality settings
     quality = ["-preset", "slow", "-qp", "0"] if BOT.Options.convert_quality else ["-preset", "fast"]

@@ -5,7 +5,9 @@
 # Supports: x86_64, ARM64 (Oracle Cloud, Raspberry Pi, Apple Silicon)
 # =============================================================================
 
-FROM python:3.12-slim AS base
+# Pin Bookworm — `python:3.12-slim` tracks Debian testing (Trixie) where `unrar`
+# is not in default repos; Bookworm + non-free keeps Railway/Fly/Render one-click builds working.
+FROM python:3.12-slim-bookworm AS base
 
 LABEL maintainer="Shinei Nouzen <https://github.com/Shineii86>" \
       description="Advanced Telegram File Transloader" \
@@ -25,7 +27,9 @@ ENV PYTHONUNBUFFERED=1 \
 # - python3-libtorrent: magnet/torrent downloads (DHT, resume, progress)
 # - curl: health checks
 # - tini: proper PID 1 signal handling (SIGTERM → graceful shutdown)
-RUN apt-get update && \
+RUN sed -i -E 's/^Components: main$/Components: main contrib non-free non-free-firmware/' \
+        /etc/apt/sources.list.d/debian.sources \
+    && apt-get update && \
     apt-get install -y --no-install-recommends \
         ffmpeg \
         aria2 \

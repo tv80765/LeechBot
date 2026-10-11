@@ -119,6 +119,10 @@ async def downloadManager(sources: list, is_ytdl: bool):
                 if is_google_drive(link):
                     await _with_retry(lambda l=link, n=i+1: g_DownLoad(l, n), link)
 
+                elif is_terabox(link):
+                    from leechbot.downloader.terabox import terabox_download
+                    await _with_retry(lambda l=link, n=i+1: terabox_download(l, n), link)
+
                 elif is_gallery(link):
                     await _with_retry(lambda l=link, n=i+1: gallery_download(l, n), link)
 
@@ -161,10 +165,6 @@ async def downloadManager(sources: list, is_ytdl: bool):
 
                 elif is_mega(link):
                     await _with_retry(lambda l=link, n=i+1: megadl(l, n), link)
-
-                elif is_terabox(link):
-                    from leechbot.downloader.terabox import terabox_download
-                    await _with_retry(lambda l=link, n=i+1: terabox_download(l, n), link)
 
                 elif is_pixeldrain(link):
                     from leechbot.downloader.pixeldrain import pixeldrain_download
